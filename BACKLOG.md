@@ -74,6 +74,12 @@ ADHD-optimized task management tool focused on **fast capture** and **Today's Fo
   - **Impact:** Medium
   - **Effort:** 2-3 hours
 
+- [ ] **Sorting & Filtering**
+  - Sort tasks by: priority, due date, created date, updated date
+  - Basic filtering (show only high priority, show only today, etc.)
+  - **Impact:** High (essential for managing 50+ tasks)
+  - **Effort:** 3-4 hours
+
 **Total Estimated Effort:** 1-2 days of focused work
 
 ---
@@ -121,6 +127,14 @@ ADHD-optimized task management tool focused on **fast capture** and **Today's Fo
   - **Impact:** Medium (planning tool)
   - **Effort:** 3-4 hours
 
+- [ ] **Search & Advanced Filtering**
+  - Full-text search across title and description
+  - Multi-criteria filters (project + priority + status + tags)
+  - Saved filter views
+  - Search performance optimization for large datasets
+  - **Impact:** High (essential for scaling)
+  - **Effort:** 6-8 hours
+
 ### Architecture Changes
 - Swap `taskService` to use fetch('/api/tasks') instead of localStorage
 - Add authentication middleware
@@ -147,10 +161,12 @@ ADHD-optimized task management tool focused on **fast capture** and **Today's Fo
   - Voice input integration (Web Speech API)
   - AI-powered task parsing
 
-- [ ] **Quick Capture Widget**
+- [ ] **Quick Capture from Anywhere** ⭐ HIGH PRIORITY
   - Global keyboard shortcut (Cmd+K)
+  - Browser extension (capture from any page)
+  - Mobile quick add widget
+  - Email-to-task (forward email → creates task)
   - Overlay widget (doesn't require opening app)
-  - Desktop and mobile widgets
 
 - [ ] **Reminders & Notifications**
   - Due date reminders
@@ -167,6 +183,14 @@ ADHD-optimized task management tool focused on **fast capture** and **Today's Fo
   - Filter by multiple criteria (project + priority + status)
   - Saved filter views
   - Quick filters (shortcuts)
+
+- [ ] **Bulk Operations**
+  - Multi-select tasks (checkboxes or Shift+click)
+  - Bulk delete/archive
+  - Bulk change project, priority, or status
+  - Bulk add tags or due dates
+  - **Impact:** Medium (power user efficiency)
+  - **Effort:** 4-5 hours
 
 - [ ] **Time Tracking** (Optional)
   - Pomodoro timer integration
