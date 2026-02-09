@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { Zap, Plus } from 'lucide-react';
 import { Task, TaskProject, TaskPriority } from '../types/task';
-import { PROJECT_META } from '../types/task';
+import { PROJECT_META, PRIORITY_META } from '../types/task';
 
 /**
  * QuickCapture - Fast task input form
@@ -28,7 +28,7 @@ interface QuickCaptureProps {
 export default function QuickCapture({ onTaskCreated }: QuickCaptureProps) {
   const [title, setTitle] = useState('');
   const [project, setProject] = useState<TaskProject>('personal');
-  const [priority, setPriority] = useState<TaskPriority>('medium');
+  const [priority, setPriority] = useState<TaskPriority>('high');
   const [dueDate, setDueDate] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -117,9 +117,11 @@ export default function QuickCapture({ onTaskCreated }: QuickCaptureProps) {
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                 disabled={isSubmitting}
               >
-                <option value="high">🔴 High</option>
-                <option value="medium">🟡 Medium</option>
-                <option value="low">🟢 Low</option>
+                {Object.entries(PRIORITY_META).map(([key, meta]) => (
+                  <option key={key} value={key}>
+                    {meta.emoji} {meta.label}
+                  </option>
+                ))}
               </select>
             </div>
 
@@ -138,7 +140,7 @@ export default function QuickCapture({ onTaskCreated }: QuickCaptureProps) {
             <button
               type="submit"
               disabled={isSubmitting || !title.trim()}
-              className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors font-medium flex items-center gap-2"
+              className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-purple-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors font-medium flex items-center gap-2"
             >
               <Plus className="w-4 h-4" />
               {isSubmitting ? 'Adding...' : 'Add Task'}

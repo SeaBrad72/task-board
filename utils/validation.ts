@@ -10,8 +10,8 @@ import { z } from 'zod';
  * - Date validation for dueDate
  */
 
-export const TaskProjectSchema = z.enum(['development', 'business', 'personal', 'learning']);
-export const TaskPrioritySchema = z.enum(['low', 'medium', 'high']);
+export const TaskProjectSchema = z.enum(['development', 'business', 'personal', 'learning', 'fitness']);
+export const TaskPrioritySchema = z.enum(['low', 'medium', 'high', 'urgent']);
 export const TaskStatusSchema = z.enum(['todo', 'in-progress', 'done']);
 
 export const CreateTaskSchema = z.object({

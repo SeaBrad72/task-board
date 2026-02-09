@@ -7,8 +7,8 @@
  * Phase 4: Will add collaboration (projectId, assignedTo, comments)
  */
 
-export type TaskProject = 'development' | 'business' | 'personal' | 'learning';
-export type TaskPriority = 'low' | 'medium' | 'high';
+export type TaskProject = 'development' | 'business' | 'personal' | 'learning' | 'fitness';
+export type TaskPriority = 'low' | 'medium' | 'high' | 'urgent';
 export type TaskStatus = 'todo' | 'in-progress' | 'done';
 
 export interface Task {
@@ -37,13 +37,15 @@ export const PROJECT_META: Record<TaskProject, { label: string; emoji: string }>
   business: { label: 'Business', emoji: '💼' },
   personal: { label: 'Personal', emoji: '🏠' },
   learning: { label: 'Learning', emoji: '📚' },
+  fitness: { label: 'Fitness', emoji: '💪' },
 };
 
 // Priority display metadata
-export const PRIORITY_META: Record<TaskPriority, { label: string; color: string }> = {
-  high: { label: 'High', color: 'text-red-600' },
-  medium: { label: 'Medium', color: 'text-yellow-600' },
-  low: { label: 'Low', color: 'text-green-600' },
+export const PRIORITY_META: Record<TaskPriority, { label: string; emoji: string; color: string }> = {
+  urgent: { label: 'Urgent', emoji: '🔥', color: 'text-purple-600' },
+  high: { label: 'High', emoji: '🔴', color: 'text-red-600' },
+  medium: { label: 'Medium', emoji: '🟡', color: 'text-yellow-600' },
+  low: { label: 'Low', emoji: '🟢', color: 'text-green-600' },
 };
 
 // Status display metadata
