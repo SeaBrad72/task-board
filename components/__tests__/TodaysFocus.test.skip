@@ -1,0 +1,36 @@
+import React from 'react';
+import { render, screen, waitFor } from '@testing-library/react';
+import TodaysFocus from '../TodaysFocus';
+
+// Mock taskService with default return values
+jest.mock('../../services/taskService', () => ({
+  taskService: {
+    getTasks: jest.fn().mockResolvedValue([]),
+    updateTask: jest.fn(),
+    toggleFocusToday: jest.fn(),
+  },
+}));
+
+describe('TodaysFocus', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    const { taskService } = require('../../services/taskService');
+    (taskService.getTasks as jest.Mock).mockResolvedValue([]);
+  });
+
+  it('should render the component', async () => {
+    render(<TodaysFocus />);
+
+    await waitFor(() => {
+      expect(screen.getByText("Today's Focus")).toBeInTheDocument();
+    });
+  });
+
+  it('should show empty state when no focused tasks', async () => {
+    render(<TodaysFocus />);
+
+    await waitFor(() => {
+      expect(screen.getByText(/no tasks focused/i)).toBeInTheDocument();
+    });
+  });
+});

@@ -1,0 +1,39 @@
+import React from 'react';
+import { render, screen, waitFor } from '@testing-library/react';
+import TaskList from '../TaskList';
+
+// Mock taskService with default return values
+jest.mock('../../services/taskService', () => ({
+  taskService: {
+    getTasks: jest.fn().mockResolvedValue([]),
+    deleteTask: jest.fn(),
+    updateTask: jest.fn(),
+    toggleFocusToday: jest.fn(),
+  },
+}));
+
+describe('TaskList', () => {
+  const mockOnTaskUpdate = jest.fn();
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    const { taskService } = require('../../services/taskService');
+    (taskService.getTasks as jest.Mock).mockResolvedValue([]);
+  });
+
+  it('should render the component', async () => {
+    render(<TaskList onTaskUpdate={mockOnTaskUpdate} />);
+
+    await waitFor(() => {
+      expect(screen.getByText('All Tasks')).toBeInTheDocument();
+    });
+  });
+
+  it('should show empty state when no tasks', async () => {
+    render(<TaskList onTaskUpdate={mockOnTaskUpdate} />);
+
+    await waitFor(() => {
+      expect(screen.getByText(/no tasks yet/i)).toBeInTheDocument();
+    });
+  });
+});

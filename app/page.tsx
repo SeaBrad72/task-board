@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { ClipboardList } from 'lucide-react';
 import { Task } from '../types/task';
 import QuickCapture from '../components/QuickCapture';
 import TodaysFocus from '../components/TodaysFocus';
@@ -122,8 +123,9 @@ export default function Home() {
       {/* Header */}
       <header className="bg-white shadow-sm border-b">
         <div className="max-w-7xl mx-auto px-4 py-6">
-          <h1 className="text-3xl font-bold text-gray-900">
-            📝 Task Board
+          <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-3">
+            <ClipboardList className="w-8 h-8" />
+            Task Board
           </h1>
           <p className="text-sm text-gray-600 mt-1">
             Fast task management for focused work

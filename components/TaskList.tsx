@@ -1,5 +1,6 @@
 'use client';
 
+import { ListTodo, CheckCircle2, Circle, Calendar, Target, Trash2, Plus } from 'lucide-react';
 import { Task, TaskProject } from '../types/task';
 import { PROJECT_META, PRIORITY_META, STATUS_META } from '../types/task';
 import { format } from 'date-fns';
@@ -60,7 +61,10 @@ export default function TaskList({
 
   return (
     <div className="space-y-6">
-      <h2 className="text-2xl font-bold">📋 All Tasks</h2>
+      <h2 className="text-2xl font-bold flex items-center gap-2">
+        <ListTodo className="w-7 h-7 text-gray-700" />
+        All Tasks
+      </h2>
 
       {Object.keys(PROJECT_META).map(projectKey => {
         const project = projectKey as TaskProject;
@@ -90,10 +94,16 @@ export default function TaskList({
                   {/* Status checkbox */}
                   <button
                     onClick={() => onToggleStatus(task.id, getNextStatus(task.status))}
-                    className="text-2xl hover:scale-110 transition-transform"
+                    className="hover:scale-110 transition-transform mt-0.5"
                     title={`Mark ${getNextStatus(task.status)}`}
                   >
-                    {STATUS_META[task.status].emoji}
+                    {task.status === 'done' ? (
+                      <CheckCircle2 className="w-5 h-5 text-green-600" />
+                    ) : task.status === 'in-progress' ? (
+                      <Circle className="w-5 h-5 text-blue-600 fill-blue-100" />
+                    ) : (
+                      <Circle className="w-5 h-5 text-gray-400" />
+                    )}
                   </button>
 
                   <div className="flex-1 min-w-0">
@@ -113,7 +123,10 @@ export default function TaskList({
                       </span>
 
                       {task.dueDate && (
-                        <span>📅 {format(task.dueDate, 'MMM d')}</span>
+                        <span className="flex items-center gap-1">
+                          <Calendar className="w-3.5 h-3.5" />
+                          {format(task.dueDate, 'MMM d')}
+                        </span>
                       )}
 
                       {task.status === 'in-progress' && (
@@ -121,8 +134,9 @@ export default function TaskList({
                       )}
 
                       {task.focusedToday && (
-                        <span className="text-indigo-600 font-medium">
-                          🎯 Today
+                        <span className="text-indigo-600 font-medium flex items-center gap-1">
+                          <Target className="w-3.5 h-3.5" />
+                          Today
                         </span>
                       )}
                     </div>
@@ -133,9 +147,10 @@ export default function TaskList({
                     {!task.focusedToday && task.status !== 'done' && (
                       <button
                         onClick={() => onAddToToday(task.id)}
-                        className="px-3 py-1 text-sm bg-blue-100 text-blue-700 rounded hover:bg-blue-200 transition-colors"
+                        className="px-3 py-1 text-sm bg-blue-100 text-blue-700 rounded hover:bg-blue-200 transition-colors flex items-center gap-1"
                         title="Add to Today's Focus"
                       >
+                        <Plus className="w-3.5 h-3.5" />
                         Add to Today
                       </button>
                     )}
@@ -149,7 +164,7 @@ export default function TaskList({
                       className="text-gray-400 hover:text-red-500 transition-colors"
                       title="Delete task"
                     >
-                      🗑️
+                      <Trash2 className="w-4 h-4" />
                     </button>
                   </div>
                 </div>

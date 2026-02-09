@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { Zap, Plus } from 'lucide-react';
 import { Task, TaskProject, TaskPriority } from '../types/task';
 import { PROJECT_META } from '../types/task';
 
@@ -70,7 +71,8 @@ export default function QuickCapture({ onTaskCreated }: QuickCaptureProps) {
   return (
     <div className="bg-white rounded-lg shadow-md p-6 mb-6">
       <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
-        ⚡ Quick Add Task
+        <Zap className="w-5 h-5 text-yellow-500" />
+        Quick Add Task
       </h2>
 
       <form onSubmit={handleSubmit}>
@@ -136,8 +138,9 @@ export default function QuickCapture({ onTaskCreated }: QuickCaptureProps) {
             <button
               type="submit"
               disabled={isSubmitting || !title.trim()}
-              className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors font-medium"
+              className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors font-medium flex items-center gap-2"
             >
+              <Plus className="w-4 h-4" />
               {isSubmitting ? 'Adding...' : 'Add Task'}
             </button>
           </div>

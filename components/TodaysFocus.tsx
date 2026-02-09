@@ -1,5 +1,6 @@
 'use client';
 
+import { Target, CheckCircle2, Circle, Calendar, X } from 'lucide-react';
 import { Task } from '../types/task';
 import { PRIORITY_META, STATUS_META } from '../types/task';
 import { format } from 'date-fns';
@@ -55,15 +56,17 @@ export default function TodaysFocus({
     <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg shadow-lg p-6 mb-6">
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-2xl font-bold flex items-center gap-2">
-          🎯 Today's Focus
+          <Target className="w-7 h-7 text-blue-600" />
+          Today's Focus
           <span className="text-sm font-normal text-gray-600">
             ({todaysTasks.length} {todaysTasks.length === 1 ? 'task' : 'tasks'})
           </span>
         </h2>
 
         {completedToday > 0 && (
-          <div className="text-sm text-green-600 font-medium">
-            ✅ {completedToday} completed today
+          <div className="text-sm text-green-600 font-medium flex items-center gap-1">
+            <CheckCircle2 className="w-4 h-4" />
+            {completedToday} completed today
           </div>
         )}
       </div>
@@ -99,10 +102,16 @@ export default function TodaysFocus({
                       task.status === 'todo' ? 'in-progress' : 'done'
                     )
                   }
-                  className="mt-1 text-2xl hover:scale-110 transition-transform"
+                  className="mt-1 hover:scale-110 transition-transform"
                   title={task.status === 'todo' ? 'Start task' : 'Mark done'}
                 >
-                  {STATUS_META[task.status].emoji}
+                  {task.status === 'done' ? (
+                    <CheckCircle2 className="w-6 h-6 text-green-600" />
+                  ) : task.status === 'in-progress' ? (
+                    <Circle className="w-6 h-6 text-blue-600 fill-blue-100" />
+                  ) : (
+                    <Circle className="w-6 h-6 text-gray-400" />
+                  )}
                 </button>
 
                 <div className="flex-1">
@@ -117,7 +126,8 @@ export default function TodaysFocus({
 
                     {task.dueDate && (
                       <span className="flex items-center gap-1">
-                        📅 {format(task.dueDate, 'MMM d')}
+                        <Calendar className="w-3.5 h-3.5" />
+                        {format(task.dueDate, 'MMM d')}
                       </span>
                     )}
 
@@ -135,7 +145,7 @@ export default function TodaysFocus({
                   className="text-gray-400 hover:text-red-500 transition-colors"
                   title="Remove from today"
                 >
-                  ✕
+                  <X className="w-5 h-5" />
                 </button>
               </div>
             </div>
