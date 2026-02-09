@@ -52,11 +52,20 @@ ADHD-optimized task management tool focused on **fast capture** and **Today's Fo
   - **Impact:** Medium (power user feature)
   - **Effort:** 2-3 hours
 
-- [ ] **Task Editing**
-  - Edit task title, priority, project in-place
+- [ ] **Task Editing** ⭐ HIGH PRIORITY
+  - Edit task title, priority, project, status in-place
+  - Edit mode: click task to open inline editor
+  - Update all task properties without deleting
   - Currently: must delete and recreate
   - **Impact:** High (common need)
   - **Effort:** 4-5 hours
+
+- [ ] **Task Descriptions/Context**
+  - Add rich text description field to tasks
+  - Expand/collapse description in task card
+  - Markdown support for formatting
+  - **Impact:** High (adds crucial context)
+  - **Effort:** 3-4 hours
 
 - [ ] **Due Date Improvements**
   - Show overdue tasks prominently
@@ -87,15 +96,42 @@ ADHD-optimized task management tool focused on **fast capture** and **Today's Fo
   - Real-time updates (optional: WebSockets or polling)
   - Conflict resolution for offline edits
 
-- [ ] **User Accounts**
+- [ ] **User Accounts** ⭐ HIGH PRIORITY
   - Sign up / Login (email + password)
   - OAuth (Google, GitHub)
   - User profile settings
+  - Secure credential storage
+
+- [ ] **Project Views**
+  - Dedicated page/view for each project
+  - Deep link to project view (e.g., /project/development)
+  - Filters and sorting per project
+
+- [ ] **Multi-Project Tags**
+  - Associate single task to multiple projects
+  - Tags system (task can be "development" AND "business")
+  - Tag-based filtering and views
+  - **Impact:** Medium (advanced organization)
+  - **Effort:** 5-6 hours
+
+- [ ] **Level of Effort (LOE) Field**
+  - Add LOE field: XS, S, M, L, XL (or hours estimate)
+  - Filter/group tasks by effort
+  - Weekly capacity planning (sum of LOE)
+  - **Impact:** Medium (planning tool)
+  - **Effort:** 3-4 hours
 
 ### Architecture Changes
 - Swap `taskService` to use fetch('/api/tasks') instead of localStorage
 - Add authentication middleware
 - Database schema design
+
+### Research & Planning
+- [ ] **ClickUp Gap Analysis**
+  - Review ClickUp features Bradley actually uses
+  - Identify must-have features to port over
+  - Prioritize integration vs. native implementation
+  - Document findings and recommendations
 
 **Estimated Effort:** 2-3 weeks
 
@@ -137,10 +173,27 @@ ADHD-optimized task management tool focused on **fast capture** and **Today's Fo
   - Estimated vs. actual time
   - Daily/weekly time reports
 
-- [ ] **Subtasks & Dependencies**
-  - Break tasks into subtasks
+- [ ] **Subtasks & Dependencies** ⭐ HIGH PRIORITY
+  - Break tasks into subtasks (checklist items)
   - Task dependencies (blocking/blocked by)
   - Progress visualization
+  - Auto-calculate parent task progress from subtasks
+
+- [ ] **Percentage Completeness**
+  - Manual progress slider (0-100%)
+  - Auto-calculated from subtasks (if subtasks exist)
+  - Visual progress bar on task cards
+  - Filter by completion percentage
+  - **Impact:** Medium (progress tracking)
+  - **Effort:** 4-5 hours
+
+- [ ] **Task Scheduling**
+  - Schedule tasks for specific date/time
+  - Calendar view integration
+  - Time blocks for focused work
+  - Move scheduled tasks to Today's Focus automatically
+  - **Impact:** High (time management)
+  - **Effort:** 6-8 hours
 
 - [ ] **Recurring Tasks**
   - Daily, weekly, monthly repeats
