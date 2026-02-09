@@ -16,10 +16,56 @@ ADHD-optimized task management tool focused on **fast capture** and **Today's Fo
 - 💾 localStorage persistence
 - 📱 Mobile-responsive design
 - 🎨 Lucide React icons
-- ✅ 80%+ test coverage
+- ✅ 73.84% test coverage (integration-first approach)
 - 🔄 CI/CD with GitHub Actions
 
 **Tech Stack:** Next.js 16, React 19, TypeScript, Tailwind v3, Zod, Jest
+
+---
+
+## 🎯 Phase 1.5: Quick Wins & Polish
+
+**Goal:** Small improvements to make Phase 1 more usable before backend work
+
+**Priority:** Address these before starting Phase 2 backend work
+
+### Features
+- [ ] **Remove from Today's Focus**
+  - Add "Remove from Today" button on focused tasks
+  - Keyboard shortcut to toggle focus status
+  - Currently: can only promote to Today, not demote
+  - **Impact:** High (common workflow need)
+  - **Effort:** 1-2 hours
+
+- [ ] **Archive & Undelete**
+  - Soft delete (archive) instead of permanent delete
+  - "Archived" view to see deleted tasks
+  - Undelete/restore from archive
+  - Auto-archive completed tasks after N days (optional)
+  - **Impact:** Medium (safety net for accidental deletes)
+  - **Effort:** 3-4 hours
+
+- [ ] **Keyboard Shortcuts** (Quick wins)
+  - `n` = New task (focus Quick Capture)
+  - `Escape` = Clear/cancel form
+  - `?` = Show keyboard shortcuts help
+  - **Impact:** Medium (power user feature)
+  - **Effort:** 2-3 hours
+
+- [ ] **Task Editing**
+  - Edit task title, priority, project in-place
+  - Currently: must delete and recreate
+  - **Impact:** High (common need)
+  - **Effort:** 4-5 hours
+
+- [ ] **Due Date Improvements**
+  - Show overdue tasks prominently
+  - "Due today" badge in Today's Focus
+  - Sort by due date option
+  - **Impact:** Medium
+  - **Effort:** 2-3 hours
+
+**Total Estimated Effort:** 1-2 days of focused work
 
 ---
 
@@ -232,8 +278,8 @@ Ideas to evaluate later:
 
 **Phase 1 (Complete):**
 - ✅ App functional and testable
-- ✅ Bradley uses it daily
-- ✅ 80%+ test coverage
+- ⏳ Bradley uses it daily (TBD after Mac testing)
+- ✅ 73.84% test coverage (behavior-focused)
 
 **Phase 2:**
 - Daily active usage across 2+ devices
