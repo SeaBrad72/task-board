@@ -1,65 +1,164 @@
-import Image from "next/image";
+'use client';
+
+import { useState, useEffect } from 'react';
+import { Task } from '../types/task';
+import QuickCapture from '../components/QuickCapture';
+import TodaysFocus from '../components/TodaysFocus';
+import TaskList from '../components/TaskList';
+
+/**
+ * Main Task Board Application
+ *
+ * React Concepts Demonstrated:
+ * - useState: Managing component state (tasks, loading)
+ * - useEffect: Side effects (loading tasks from localStorage)
+ * - Component composition: QuickCapture, TodaysFocus, TaskList
+ * - Props drilling: Passing data and callbacks to children
+ * - Event handlers: onTaskCreated, onToggleStatus, etc.
+ *
+ * State Management:
+ * - All state lives here (single source of truth)
+ * - Children receive data via props
+ * - Children notify parent via callback props
+ * - Parent updates state, React re-renders children
+ *
+ * Data Flow:
+ * 1. Load tasks from localStorage on mount
+ * 2. Pass tasks to child components
+ * 3. Children call callbacks (onAddToToday, etc.)
+ * 4. Parent updates state
+ * 5. React re-renders with new data
+ * 6. Changes persist to localStorage
+ *
+ * Phase 2 changes:
+ * - Swap taskService.getTasks() to fetch('/api/tasks')
+ * - No other changes needed (data layer abstraction!)
+ */
 
 export default function Home() {
+  const [tasks, setTasks] = useState<Task[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Load tasks on mount
+  useEffect(() => {
+    loadTasks();
+  }, []);
+
+  async function loadTasks() {
+    try {
+      const { taskService } = await import('../services/taskService');
+      const loadedTasks = await taskService.getTasks();
+      setTasks(loadedTasks);
+    } catch (error) {
+      console.error('Error loading tasks:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  }
+
+  // Handler: Task created
+  function handleTaskCreated(task: Task) {
+    setTasks(prev => [...prev, task]);
+  }
+
+  // Handler: Toggle task status
+  async function handleToggleStatus(id: string, status: Task['status']) {
+    try {
+      const { taskService } = await import('../services/taskService');
+      await taskService.updateTask(id, { status });
+      await loadTasks(); // Reload to get updated data
+    } catch (error) {
+      console.error('Error updating task:', error);
+      alert('Failed to update task');
+    }
+  }
+
+  // Handler: Add task to Today's Focus
+  async function handleAddToToday(id: string) {
+    try {
+      const { taskService } = await import('../services/taskService');
+      await taskService.toggleFocusToday(id);
+      await loadTasks();
+    } catch (error) {
+      console.error('Error adding to today:', error);
+      alert('Failed to add task to today');
+    }
+  }
+
+  // Handler: Remove task from Today's Focus
+  async function handleRemoveFromToday(id: string) {
+    try {
+      const { taskService } = await import('../services/taskService');
+      await taskService.toggleFocusToday(id);
+      await loadTasks();
+    } catch (error) {
+      console.error('Error removing from today:', error);
+      alert('Failed to remove task from today');
+    }
+  }
+
+  // Handler: Delete task
+  async function handleDeleteTask(id: string) {
+    try {
+      const { taskService } = await import('../services/taskService');
+      await taskService.deleteTask(id);
+      await loadTasks();
+    } catch (error) {
+      console.error('Error deleting task:', error);
+      alert('Failed to delete task');
+    }
+  }
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-xl text-gray-600">Loading tasks...</div>
+      </div>
+    );
+  }
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
+    <div className="min-h-screen bg-gray-50">
+      {/* Header */}
+      <header className="bg-white shadow-sm border-b">
+        <div className="max-w-7xl mx-auto px-4 py-6">
+          <h1 className="text-3xl font-bold text-gray-900">
+            📝 Task Board
           </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
+          <p className="text-sm text-gray-600 mt-1">
+            Fast task management for focused work
           </p>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
+      </header>
+
+      {/* Main Content */}
+      <main className="max-w-7xl mx-auto px-4 py-8">
+        {/* Quick Capture - Always at top */}
+        <QuickCapture onTaskCreated={handleTaskCreated} />
+
+        {/* Today's Focus - Primary workflow */}
+        <TodaysFocus
+          tasks={tasks}
+          onToggleStatus={handleToggleStatus}
+          onRemoveFromToday={handleRemoveFromToday}
+        />
+
+        {/* All Tasks - Grouped by project */}
+        <TaskList
+          tasks={tasks}
+          onAddToToday={handleAddToToday}
+          onToggleStatus={handleToggleStatus}
+          onDeleteTask={handleDeleteTask}
+        />
       </main>
+
+      {/* Footer */}
+      <footer className="mt-12 py-6 text-center text-sm text-gray-500 border-t">
+        <p>Task Board v1.0 - Phase 1 (localStorage)</p>
+        <p className="text-xs mt-1">
+          Built with Next.js, React, TypeScript, Tailwind CSS
+        </p>
+      </footer>
     </div>
   );
 }
