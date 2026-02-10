@@ -43,8 +43,8 @@ export default function TodaysFocus({
   const todaysTasks = tasks
     .filter(task => task.focusedToday && task.status !== 'done')
     .sort((a, b) => {
-      // Sort by priority: high → medium → low
-      const priorityOrder = { high: 0, medium: 1, low: 2 };
+      // Sort by priority: urgent → high → medium → low
+      const priorityOrder = { urgent: 0, high: 1, medium: 2, low: 3 };
       return priorityOrder[a.priority] - priorityOrder[b.priority];
     });
 
