@@ -1,21 +1,15 @@
 import { z } from 'zod';
-import { v4 as uuidv4 } from 'uuid';
-import { promises as fs } from 'fs';
-import path from 'path';
-import { fileURLToPath } from 'url';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+import { PrismaClient } from '@prisma/client';
 
 /**
- * Task Model - Matches Frontend Schema Exactly
+ * Task Model - PostgreSQL + Prisma
  *
- * Day 8 - File-Based Persistence
- * - JSON file storage for data persistence across restarts
- * - Async operations matching database patterns
+ * Day 8 Upgrade - PostgreSQL Database Persistence
+ * - Prisma ORM for type-safe database operations
+ * - PostgreSQL for production-ready data storage
  * - Schema matches frontend types/task.ts precisely
  * - Zod validation for request/response
- * - Migration path to PostgreSQL/Prisma ready
+ * - Full ACID compliance and proper transactions
  */
 
 // Zod validation schema - matches frontend TaskProject, TaskPriority, TaskStatus
@@ -33,77 +27,47 @@ export const TaskSchema = z.object({
 export const TaskUpdateSchema = TaskSchema.partial();
 
 /**
- * File-Based Task Storage
- * - Day 8: JSON file persistence
- * - Async operations (matches database pattern)
- * - Easy migration to PostgreSQL later
+ * PostgreSQL Task Storage via Prisma
+ * - Production-ready database persistence
+ * - Type-safe queries with Prisma Client
+ * - Automatic timestamps (createdAt, updatedAt)
+ * - ACID transactions and data integrity
  */
 class TaskModel {
   constructor() {
-    this.tasks = new Map();
-    this.dataFile = path.join(__dirname, '../../data/tasks.json');
+    this.prisma = new PrismaClient();
     this.isInitialized = false;
   }
 
   /**
-   * Load tasks from file on startup
-   * @private
-   */
-  async _loadFromFile() {
-    try {
-      // Ensure data directory exists
-      const dataDir = path.dirname(this.dataFile);
-      await fs.mkdir(dataDir, { recursive: true });
-
-      // Try to read existing file
-      const data = await fs.readFile(this.dataFile, 'utf-8');
-      const tasks = JSON.parse(data);
-
-      // Populate Map from loaded data
-      this.tasks.clear();
-      tasks.forEach(task => {
-        this.tasks.set(task.id, task);
-      });
-
-      console.log(`[TaskModel] Loaded ${tasks.length} tasks from ${this.dataFile}`);
-    } catch (error) {
-      if (error.code === 'ENOENT') {
-        // File doesn't exist yet - that's fine
-        console.log('[TaskModel] No existing data file, starting fresh');
-      } else {
-        console.error('[TaskModel] Error loading data:', error);
-      }
-    }
-  }
-
-  /**
-   * Save tasks to file after every change
-   * @private
-   */
-  async _saveToFile() {
-    try {
-      const tasks = Array.from(this.tasks.values());
-      await fs.writeFile(this.dataFile, JSON.stringify(tasks, null, 2), 'utf-8');
-    } catch (error) {
-      console.error('[TaskModel] Error saving data:', error);
-      throw new Error('Failed to persist task data');
-    }
-  }
-
-  /**
-   * Initialize the model (load from file)
+   * Initialize the model (ensure database connection)
    * Call this once on server startup
    */
   async initialize() {
     if (this.isInitialized) return;
 
-    await this._loadFromFile();
-    this.isInitialized = true;
+    try {
+      // Test database connection
+      await this.prisma.$connect();
+      console.log('[TaskModel] Connected to PostgreSQL database');
+      this.isInitialized = true;
 
-    // Initialize seed data if empty (development only)
-    if (this.tasks.size === 0 && process.env.NODE_ENV !== 'test') {
-      await this._initializeSeedData();
+      // Initialize seed data if empty (development only)
+      const count = await this.prisma.task.count();
+      if (count === 0 && process.env.NODE_ENV !== 'test') {
+        await this._initializeSeedData();
+      }
+    } catch (error) {
+      console.error('[TaskModel] Failed to connect to database:', error);
+      throw error;
     }
+  }
+
+  /**
+   * Disconnect from database (cleanup)
+   */
+  async disconnect() {
+    await this.prisma.$disconnect();
   }
 
   /**
@@ -112,15 +76,20 @@ class TaskModel {
    * @returns {Promise<Object>} Created task with id, createdAt, updatedAt
    */
   async create(taskData) {
-    const task = {
-      id: uuidv4(),
-      ...taskData,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
-    };
-    this.tasks.set(task.id, task);
-    await this._saveToFile();
-    return task;
+    const task = await this.prisma.task.create({
+      data: {
+        title: taskData.title,
+        description: taskData.description || null,
+        project: taskData.project,
+        priority: taskData.priority,
+        status: taskData.status,
+        dueDate: taskData.dueDate ? new Date(taskData.dueDate) : null,
+        focusedToday: taskData.focusedToday
+      }
+    });
+
+    // Convert dates to ISO strings for API consistency
+    return this._formatTask(task);
   }
 
   /**
@@ -128,9 +97,13 @@ class TaskModel {
    * @returns {Promise<Array>} All tasks
    */
   async findAll() {
-    return Array.from(this.tasks.values()).sort((a, b) =>
-      new Date(b.createdAt) - new Date(a.createdAt)
-    );
+    const tasks = await this.prisma.task.findMany({
+      orderBy: {
+        createdAt: 'desc'
+      }
+    });
+
+    return tasks.map(task => this._formatTask(task));
   }
 
   /**
@@ -139,7 +112,11 @@ class TaskModel {
    * @returns {Promise<Object|null>} Task or null if not found
    */
   async findById(id) {
-    return this.tasks.get(id) || null;
+    const task = await this.prisma.task.findUnique({
+      where: { id }
+    });
+
+    return task ? this._formatTask(task) : null;
   }
 
   /**
@@ -149,20 +126,30 @@ class TaskModel {
    * @returns {Promise<Object|null>} Updated task or null if not found
    */
   async update(id, updates) {
-    const task = this.tasks.get(id);
-    if (!task) return null;
+    try {
+      const task = await this.prisma.task.update({
+        where: { id },
+        data: {
+          ...(updates.title !== undefined && { title: updates.title }),
+          ...(updates.description !== undefined && { description: updates.description }),
+          ...(updates.project !== undefined && { project: updates.project }),
+          ...(updates.priority !== undefined && { priority: updates.priority }),
+          ...(updates.status !== undefined && { status: updates.status }),
+          ...(updates.dueDate !== undefined && {
+            dueDate: updates.dueDate ? new Date(updates.dueDate) : null
+          }),
+          ...(updates.focusedToday !== undefined && { focusedToday: updates.focusedToday })
+        }
+      });
 
-    const updatedTask = {
-      ...task,
-      ...updates,
-      id, // Ensure ID doesn't change
-      createdAt: task.createdAt, // Preserve creation timestamp
-      updatedAt: new Date().toISOString()
-    };
-
-    this.tasks.set(id, updatedTask);
-    await this._saveToFile();
-    return updatedTask;
+      return this._formatTask(task);
+    } catch (error) {
+      // Prisma throws if record not found
+      if (error.code === 'P2025') {
+        return null;
+      }
+      throw error;
+    }
   }
 
   /**
@@ -171,27 +158,47 @@ class TaskModel {
    * @returns {Promise<Object|null>} Deleted task or null if not found
    */
   async delete(id) {
-    const task = this.tasks.get(id);
-    if (!task) return null;
+    try {
+      const task = await this.prisma.task.delete({
+        where: { id }
+      });
 
-    this.tasks.delete(id);
-    await this._saveToFile();
-    return task;
+      return this._formatTask(task);
+    } catch (error) {
+      // Prisma throws if record not found
+      if (error.code === 'P2025') {
+        return null;
+      }
+      throw error;
+    }
   }
 
   /**
    * Clear all tasks (for testing)
    */
   async clear() {
-    this.tasks.clear();
-    await this._saveToFile();
+    await this.prisma.task.deleteMany();
   }
 
   /**
    * Get task count (for testing)
    */
-  count() {
-    return this.tasks.size;
+  async count() {
+    return await this.prisma.task.count();
+  }
+
+  /**
+   * Format task for API response
+   * Convert Date objects to ISO strings
+   * @private
+   */
+  _formatTask(task) {
+    return {
+      ...task,
+      createdAt: task.createdAt.toISOString(),
+      updatedAt: task.updatedAt.toISOString(),
+      dueDate: task.dueDate ? task.dueDate.toISOString() : null
+    };
   }
 
   /**
@@ -203,7 +210,6 @@ class TaskModel {
     // Seed Task 1: Development task
     await this.create({
       title: 'Build REST API endpoints',
-      description: 'Implement GET, POST, PUT, DELETE endpoints for tasks',
       project: 'development',
       priority: 'high',
       status: 'done',
@@ -211,10 +217,9 @@ class TaskModel {
       dueDate: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toISOString()
     });
 
-    // Seed Task 2: Add file persistence
+    // Seed Task 2: Database persistence
     await this.create({
-      title: 'Add file-based persistence',
-      description: 'Implement JSON file storage for task data',
+      title: 'Migrate to PostgreSQL + Prisma',
       project: 'development',
       priority: 'high',
       status: 'in-progress',
@@ -225,7 +230,6 @@ class TaskModel {
     // Seed Task 3: Learning task
     await this.create({
       title: 'Complete bootcamp Day 8',
-      description: 'Database persistence with async patterns',
       project: 'learning',
       priority: 'urgent',
       status: 'in-progress',

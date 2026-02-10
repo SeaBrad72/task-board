@@ -1,0 +1,22 @@
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: taskboard-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: taskboard_user
+      POSTGRES_PASSWORD: taskboard_dev_password
+      POSTGRES_DB: taskboard_dev
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U taskboard_user -d taskboard_dev"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  postgres_data:
+    driver: local

@@ -16,6 +16,11 @@ describe('Task Board REST API', () => {
     await taskModel.initialize();
   });
 
+  // Disconnect from database after all tests
+  afterAll(async () => {
+    await taskModel.disconnect();
+  });
+
   // Clear and reinitialize data before each test
   beforeEach(async () => {
     await taskModel.clear();
@@ -302,13 +307,13 @@ describe('Task Board REST API', () => {
   });
 
   describe('Model Methods', () => {
-    it('should return task count', () => {
-      expect(taskModel.count()).toBeGreaterThan(0);
+    it('should return task count', async () => {
+      expect(await taskModel.count()).toBeGreaterThan(0);
     });
 
     it('should clear all tasks', async () => {
       await taskModel.clear();
-      expect(taskModel.count()).toBe(0);
+      expect(await taskModel.count()).toBe(0);
       await taskModel._initializeSeedData(); // Restore for other tests
     });
   });
