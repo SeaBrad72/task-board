@@ -41,6 +41,14 @@ dev.db-journal
 *.db
 *.db-journal
 
-# Data files
-data/
+# Data files (but keep tasks.json for persistence)
+# data/ folder is ignored except tasks.json
+data/*
+!data/tasks.json
+
+# JSON files (but keep tasks.json and package.json)
 *.json
+!package.json
+!package-lock.json
+!tsconfig.json
+!data/tasks.json

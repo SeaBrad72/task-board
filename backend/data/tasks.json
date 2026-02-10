@@ -1,0 +1,49 @@
+[
+  {
+    "id": "8618ecea-e250-47b5-9f75-4a03c46ed359",
+    "title": "Build REST API endpoints",
+    "description": "Implement GET, POST, PUT, DELETE endpoints for tasks",
+    "project": "development",
+    "priority": "high",
+    "status": "done",
+    "focusedToday": false,
+    "dueDate": "2026-02-12T14:27:47.339Z",
+    "createdAt": "2026-02-10T14:27:47.339Z",
+    "updatedAt": "2026-02-10T14:27:47.339Z"
+  },
+  {
+    "id": "c66ee56a-6437-471f-a186-e90843c82b0a",
+    "title": "Add file-based persistence",
+    "description": "Implement JSON file storage for task data",
+    "project": "development",
+    "priority": "high",
+    "status": "in-progress",
+    "focusedToday": true,
+    "dueDate": "2026-02-11T14:27:47.340Z",
+    "createdAt": "2026-02-10T14:27:47.340Z",
+    "updatedAt": "2026-02-10T14:27:47.340Z"
+  },
+  {
+    "id": "ea1d522c-9685-41d7-8eef-aa8aacb3080a",
+    "title": "Complete bootcamp Day 8",
+    "description": "Database persistence with async patterns",
+    "project": "learning",
+    "priority": "urgent",
+    "status": "in-progress",
+    "focusedToday": true,
+    "dueDate": null,
+    "createdAt": "2026-02-10T14:27:47.340Z",
+    "updatedAt": "2026-02-10T14:27:47.340Z"
+  },
+  {
+    "id": "4c2a4d07-171f-4ee2-8f9a-9331be5667e1",
+    "title": "Persistence Test Task",
+    "description": "This task should survive server restart",
+    "project": "personal",
+    "priority": "high",
+    "status": "todo",
+    "focusedToday": false,
+    "createdAt": "2026-02-10T14:28:10.714Z",
+    "updatedAt": "2026-02-10T14:28:10.714Z"
+  }
+]
