@@ -7,8 +7,51 @@ on:
     branches: [ main, develop ]
 
 jobs:
+  # Backend API Tests
+  backend-test:
+    name: Backend API Tests
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: ./backend
+
+    strategy:
+      matrix:
+        node-version: [20.x]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+          cache-dependency-path: backend/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run tests
+        run: npm test
+
+      - name: Run coverage
+        run: npm run test:coverage
+
+      - name: Upload backend coverage
+        uses: codecov/codecov-action@v4
+        if: success()
+        with:
+          files: ./backend/coverage/lcov.info
+          flags: backend
+          name: backend-coverage
+          fail_ci_if_error: false
+
+  # Frontend Tests
   test:
-    name: Test & Build
+    name: Frontend Tests & Build
     runs-on: ubuntu-latest
 
     strategy:
@@ -34,13 +77,13 @@ jobs:
       - name: Run tests
         run: npm run test:coverage
 
-      - name: Upload coverage reports
+      - name: Upload frontend coverage
         uses: codecov/codecov-action@v4
         if: success()
         with:
           files: ./coverage/lcov.info
-          flags: unittests
-          name: codecov-umbrella
+          flags: frontend
+          name: frontend-coverage
           fail_ci_if_error: false
 
       - name: Build application
@@ -93,17 +136,17 @@ jobs:
 
   build-success:
     name: Build Status
-    needs: [test, lint, security]
+    needs: [backend-test, test, lint, security]
     runs-on: ubuntu-latest
     if: success()
 
     steps:
       - name: Build success notification
-        run: echo "✅ All checks passed! Ready to merge."
+        run: echo "✅ All checks passed! Backend + Frontend ready to merge."
 
   build-failure:
     name: Build Failed
-    needs: [test, lint, security]
+    needs: [backend-test, test, lint, security]
     runs-on: ubuntu-latest
     if: failure()
 

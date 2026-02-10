@@ -4,6 +4,8 @@
 
 Built with Next.js 16, React 19, TypeScript, and Tailwind CSS.
 
+**🚀 [Live Demo](https://task-board-henna-ten.vercel.app/)** | Deployed on Vercel
+
 ---
 
 ## ✨ Features (Phase 1)
