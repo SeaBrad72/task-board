@@ -5,12 +5,14 @@ RESTful API backend for the Task Board application built with Express.js.
 ## Features
 
 ✅ **RESTful API Design** - HTTP methods, proper status codes, JSON responses
+✅ **Data Persistence** - JSON file storage (survives server restarts)
+✅ **Async Operations** - Full async/await pattern for all data operations
 ✅ **Input Validation** - Zod schema validation for all requests
 ✅ **Error Handling** - Consistent error responses with detailed messages
 ✅ **CORS Support** - Cross-origin requests enabled
 ✅ **Security** - Helmet.js for security headers
 ✅ **Logging** - Morgan HTTP request logger
-✅ **Testing** - 90%+ test coverage with Jest and Supertest
+✅ **Testing** - 28 tests passing, 86.99% coverage with Jest and Supertest
 
 ## API Endpoints
 
@@ -211,9 +213,15 @@ npm start
 
 ## Environment Variables
 
+Create a `.env` file in the backend directory (see `.env.example`):
+
 ```env
+# Server configuration
 PORT=3001
-NODE_ENV=development|production|test
+NODE_ENV=development
+
+# Database (for future PostgreSQL migration)
+DATABASE_URL="file:./dev.db"
 ```
 
 ## Technology Stack
@@ -224,29 +232,43 @@ NODE_ENV=development|production|test
 - **Security:** Helmet.js, CORS
 - **Logging:** Morgan
 - **Testing:** Jest, Supertest
-- **Storage:** In-memory (PostgreSQL on Day 8)
+- **Storage:** File-based JSON persistence (ready for PostgreSQL migration)
+- **Async Patterns:** Full async/await with Node.js fs.promises
 
-## Next Steps (Day 8+)
+## Day 8 Completed ✅
 
-- [ ] Replace in-memory storage with PostgreSQL
-- [ ] Add Prisma ORM for database queries
-- [ ] Implement database migrations
+- [x] Data persistence (file-based JSON storage)
+- [x] Async/await patterns throughout codebase
+- [x] All tests updated for async operations
+- [x] Data survives server restarts
+
+## Next Steps (Day 9+)
+
+- [ ] Frontend integration with React
+- [ ] Deploy backend to Vercel serverless functions
+- [ ] Upgrade to Vercel Postgres (Prisma migration ready)
 - [ ] Add user authentication (JWT)
 - [ ] Multi-user support with data isolation
-- [ ] Deploy to production
+- [ ] Phase 1.5: Task editing, soft deletes, keyboard shortcuts
 
 ## Architecture
 
 ```
 backend/
 ├── src/
-│   ├── controllers/      # Request handlers
+│   ├── controllers/      # Request handlers (async)
 │   ├── middleware/       # Express middleware
-│   ├── models/          # Data models & validation
+│   ├── models/          # Data models & validation (async)
 │   ├── routes/          # API route definitions
 │   ├── utils/           # Error classes & utilities
-│   ├── tests/           # Test files
+│   ├── tests/           # Test files (28 tests)
 │   └── server.js        # Express app setup
+├── data/
+│   └── tasks.json       # Persisted task data
+├── prisma/
+│   └── schema.prisma    # Database schema (future migration)
+├── .env                 # Environment variables (gitignored)
+├── .env.example         # Environment template
 ├── package.json
 ├── jest.config.js
 └── README.md
@@ -254,4 +276,6 @@ backend/
 
 ---
 
-**Day 7 of 28-Day Full-Stack Bootcamp** 🚀
+**Day 8 of 28-Day Full-Stack Bootcamp** 🚀
+
+**Status:** Backend complete with data persistence! Ready for frontend integration and deployment.

@@ -1,0 +1,23 @@
+// Prisma schema file for Task Board
+// Learn more: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Task {
+  id            String   @id @default(uuid())
+  title         String
+  project       String
+  priority      String
+  status        String
+  dueDate       DateTime?
+  focusedToday  Boolean  @default(false)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}

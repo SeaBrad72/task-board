@@ -4,6 +4,7 @@ import helmet from 'helmet';
 import morgan from 'morgan';
 import taskRoutes from './routes/tasks.js';
 import { errorHandler } from './utils/errors.js';
+import { taskModel } from './models/Task.js';
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -32,12 +33,17 @@ app.use((req, res) => {
   });
 });
 
-// Start server (only if not in test mode)
+// Initialize database and start server (only if not in test mode)
 if (process.env.NODE_ENV !== 'test') {
-  app.listen(PORT, () => {
-    console.log(`✅ Task Board API running on http://localhost:${PORT}`);
-    console.log(`📊 Health check: http://localhost:${PORT}/health`);
-    console.log(`📝 API endpoints: http://localhost:${PORT}/api/tasks`);
+  taskModel.initialize().then(() => {
+    app.listen(PORT, () => {
+      console.log(`✅ Task Board API running on http://localhost:${PORT}`);
+      console.log(`📊 Health check: http://localhost:${PORT}/health`);
+      console.log(`📝 API endpoints: http://localhost:${PORT}/api/tasks`);
+    });
+  }).catch(error => {
+    console.error('Failed to initialize database:', error);
+    process.exit(1);
   });
 }
 

@@ -33,3 +33,14 @@ Thumbs.db
 tmp/
 temp/
 *.tmp
+
+# Database files
+.env
+dev.db
+dev.db-journal
+*.db
+*.db-journal
+
+# Data files
+data/
+*.json

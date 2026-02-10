@@ -5,7 +5,7 @@ export const taskController = {
   // GET /api/tasks - Get all tasks
   getAllTasks: async (req, res, next) => {
     try {
-      const tasks = taskModel.findAll();
+      const tasks = await taskModel.findAll();
       res.json({
         success: true,
         data: tasks,
@@ -20,7 +20,7 @@ export const taskController = {
   getTaskById: async (req, res, next) => {
     try {
       const { id } = req.params;
-      const task = taskModel.findById(id);
+      const task = await taskModel.findById(id);
 
       if (!task) {
         throw new NotFoundError(`Task with id ${id} not found`);
@@ -42,7 +42,7 @@ export const taskController = {
       const validatedData = TaskSchema.parse(req.body);
 
       // Create task
-      const task = taskModel.create(validatedData);
+      const task = await taskModel.create(validatedData);
 
       res.status(201).json({
         success: true,
@@ -64,7 +64,7 @@ export const taskController = {
       const { id } = req.params;
 
       // Check if task exists
-      const existingTask = taskModel.findById(id);
+      const existingTask = await taskModel.findById(id);
       if (!existingTask) {
         throw new NotFoundError(`Task with id ${id} not found`);
       }
@@ -73,7 +73,7 @@ export const taskController = {
       const validatedData = TaskUpdateSchema.parse(req.body);
 
       // Update task
-      const updatedTask = taskModel.update(id, validatedData);
+      const updatedTask = await taskModel.update(id, validatedData);
 
       res.json({
         success: true,
@@ -94,7 +94,7 @@ export const taskController = {
     try {
       const { id } = req.params;
 
-      const deletedTask = taskModel.delete(id);
+      const deletedTask = await taskModel.delete(id);
 
       if (!deletedTask) {
         throw new NotFoundError(`Task with id ${id} not found`);

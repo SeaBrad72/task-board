@@ -11,10 +11,15 @@ import { taskModel } from '../models/Task.js';
  */
 
 describe('Task Board REST API', () => {
+  // Initialize database before all tests
+  beforeAll(async () => {
+    await taskModel.initialize();
+  });
+
   // Clear and reinitialize data before each test
-  beforeEach(() => {
-    taskModel.clear();
-    taskModel._initializeSeedData();
+  beforeEach(async () => {
+    await taskModel.clear();
+    await taskModel._initializeSeedData();
   });
 
   describe('GET /health', () => {
@@ -301,10 +306,10 @@ describe('Task Board REST API', () => {
       expect(taskModel.count()).toBeGreaterThan(0);
     });
 
-    it('should clear all tasks', () => {
-      taskModel.clear();
+    it('should clear all tasks', async () => {
+      await taskModel.clear();
       expect(taskModel.count()).toBe(0);
-      taskModel._initializeSeedData(); // Restore for other tests
+      await taskModel._initializeSeedData(); // Restore for other tests
     });
   });
 

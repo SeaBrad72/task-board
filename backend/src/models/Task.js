@@ -1,13 +1,21 @@
 import { z } from 'zod';
 import { v4 as uuidv4 } from 'uuid';
+import { promises as fs } from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 /**
  * Task Model - Matches Frontend Schema Exactly
  *
- * Day 7 - REST API Backend
- * - In-memory storage (Day 8 will add PostgreSQL)
+ * Day 8 - File-Based Persistence
+ * - JSON file storage for data persistence across restarts
+ * - Async operations matching database patterns
  * - Schema matches frontend types/task.ts precisely
  * - Zod validation for request/response
+ * - Migration path to PostgreSQL/Prisma ready
  */
 
 // Zod validation schema - matches frontend TaskProject, TaskPriority, TaskStatus
@@ -25,21 +33,85 @@ export const TaskSchema = z.object({
 export const TaskUpdateSchema = TaskSchema.partial();
 
 /**
- * In-Memory Task Storage
- * - Day 7: Uses Map for fast lookups
- * - Day 8: Will replace with PostgreSQL + Prisma
+ * File-Based Task Storage
+ * - Day 8: JSON file persistence
+ * - Async operations (matches database pattern)
+ * - Easy migration to PostgreSQL later
  */
 class TaskModel {
   constructor() {
     this.tasks = new Map();
+    this.dataFile = path.join(__dirname, '../../data/tasks.json');
+    this.isInitialized = false;
+  }
+
+  /**
+   * Load tasks from file on startup
+   * @private
+   */
+  async _loadFromFile() {
+    try {
+      // Ensure data directory exists
+      const dataDir = path.dirname(this.dataFile);
+      await fs.mkdir(dataDir, { recursive: true });
+
+      // Try to read existing file
+      const data = await fs.readFile(this.dataFile, 'utf-8');
+      const tasks = JSON.parse(data);
+
+      // Populate Map from loaded data
+      this.tasks.clear();
+      tasks.forEach(task => {
+        this.tasks.set(task.id, task);
+      });
+
+      console.log(`[TaskModel] Loaded ${tasks.length} tasks from ${this.dataFile}`);
+    } catch (error) {
+      if (error.code === 'ENOENT') {
+        // File doesn't exist yet - that's fine
+        console.log('[TaskModel] No existing data file, starting fresh');
+      } else {
+        console.error('[TaskModel] Error loading data:', error);
+      }
+    }
+  }
+
+  /**
+   * Save tasks to file after every change
+   * @private
+   */
+  async _saveToFile() {
+    try {
+      const tasks = Array.from(this.tasks.values());
+      await fs.writeFile(this.dataFile, JSON.stringify(tasks, null, 2), 'utf-8');
+    } catch (error) {
+      console.error('[TaskModel] Error saving data:', error);
+      throw new Error('Failed to persist task data');
+    }
+  }
+
+  /**
+   * Initialize the model (load from file)
+   * Call this once on server startup
+   */
+  async initialize() {
+    if (this.isInitialized) return;
+
+    await this._loadFromFile();
+    this.isInitialized = true;
+
+    // Initialize seed data if empty (development only)
+    if (this.tasks.size === 0 && process.env.NODE_ENV !== 'test') {
+      await this._initializeSeedData();
+    }
   }
 
   /**
    * Create a new task
    * @param {Object} taskData - Validated task data
-   * @returns {Object} Created task with id, createdAt, updatedAt
+   * @returns {Promise<Object>} Created task with id, createdAt, updatedAt
    */
-  create(taskData) {
+  async create(taskData) {
     const task = {
       id: uuidv4(),
       ...taskData,
@@ -47,14 +119,15 @@ class TaskModel {
       updatedAt: new Date().toISOString()
     };
     this.tasks.set(task.id, task);
+    await this._saveToFile();
     return task;
   }
 
   /**
    * Get all tasks, sorted by creation date (newest first)
-   * @returns {Array} All tasks
+   * @returns {Promise<Array>} All tasks
    */
-  findAll() {
+  async findAll() {
     return Array.from(this.tasks.values()).sort((a, b) =>
       new Date(b.createdAt) - new Date(a.createdAt)
     );
@@ -63,9 +136,9 @@ class TaskModel {
   /**
    * Get task by ID
    * @param {string} id - Task ID
-   * @returns {Object|null} Task or null if not found
+   * @returns {Promise<Object|null>} Task or null if not found
    */
-  findById(id) {
+  async findById(id) {
     return this.tasks.get(id) || null;
   }
 
@@ -73,9 +146,9 @@ class TaskModel {
    * Update task
    * @param {string} id - Task ID
    * @param {Object} updates - Fields to update
-   * @returns {Object|null} Updated task or null if not found
+   * @returns {Promise<Object|null>} Updated task or null if not found
    */
-  update(id, updates) {
+  async update(id, updates) {
     const task = this.tasks.get(id);
     if (!task) return null;
 
@@ -88,27 +161,30 @@ class TaskModel {
     };
 
     this.tasks.set(id, updatedTask);
+    await this._saveToFile();
     return updatedTask;
   }
 
   /**
    * Delete task
    * @param {string} id - Task ID
-   * @returns {Object|null} Deleted task or null if not found
+   * @returns {Promise<Object|null>} Deleted task or null if not found
    */
-  delete(id) {
+  async delete(id) {
     const task = this.tasks.get(id);
     if (!task) return null;
 
     this.tasks.delete(id);
+    await this._saveToFile();
     return task;
   }
 
   /**
    * Clear all tasks (for testing)
    */
-  clear() {
+  async clear() {
     this.tasks.clear();
+    await this._saveToFile();
   }
 
   /**
@@ -121,48 +197,45 @@ class TaskModel {
   /**
    * Initialize seed data for development and testing
    */
-  _initializeSeedData() {
-    this.clear();
+  async _initializeSeedData() {
+    await this.clear();
 
     // Seed Task 1: Development task
-    this.create({
+    await this.create({
       title: 'Build REST API endpoints',
       description: 'Implement GET, POST, PUT, DELETE endpoints for tasks',
       project: 'development',
       priority: 'high',
-      status: 'in-progress',
-      focusedToday: true,
+      status: 'done',
+      focusedToday: false,
       dueDate: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toISOString()
     });
 
-    // Seed Task 2: Business task
-    this.create({
-      title: 'Review quarterly metrics',
-      description: 'Analyze Q1 performance and prepare report',
-      project: 'business',
-      priority: 'medium',
-      status: 'todo',
-      focusedToday: false,
-      dueDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
+    // Seed Task 2: Add file persistence
+    await this.create({
+      title: 'Add file-based persistence',
+      description: 'Implement JSON file storage for task data',
+      project: 'development',
+      priority: 'high',
+      status: 'in-progress',
+      focusedToday: true,
+      dueDate: new Date(Date.now() + 1 * 24 * 60 * 60 * 1000).toISOString()
     });
 
     // Seed Task 3: Learning task
-    this.create({
-      title: 'Complete bootcamp Day 7',
-      description: 'REST API + JSON with 90%+ test coverage',
+    await this.create({
+      title: 'Complete bootcamp Day 8',
+      description: 'Database persistence with async patterns',
       project: 'learning',
       priority: 'urgent',
       status: 'in-progress',
       focusedToday: true,
       dueDate: null
     });
+
+    console.log('[TaskModel] Initialized with 3 seed tasks');
   }
 }
 
 // Export singleton instance
 export const taskModel = new TaskModel();
-
-// Initialize with seed data for development
-if (process.env.NODE_ENV !== 'test') {
-  taskModel._initializeSeedData();
-}
