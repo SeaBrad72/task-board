@@ -48,7 +48,7 @@ export default function TaskList({
   // Sort tasks within each project by priority
   Object.keys(tasksByProject).forEach(project => {
     tasksByProject[project as TaskProject].sort((a, b) => {
-      const priorityOrder = { high: 0, medium: 1, low: 2 };
+      const priorityOrder = { urgent: 0, high: 1, medium: 2, low: 3 };
       return priorityOrder[a.priority] - priorityOrder[b.priority];
     });
   });
